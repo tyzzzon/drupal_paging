@@ -1,0 +1,5 @@
+name: Paging8
+description: Simple pager for Drupal 8
+type: module
+package: paging
+core: 8.x

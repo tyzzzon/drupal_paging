@@ -1,0 +1,98 @@
+/* MOBILE PORTRAIT */
+@media only screen and (min-width: 0px) {
+
+.paging8 {
+    clear: both;
+    float: left;
+    width: 100%;
+    background-color: #eae7bd;
+    padding: 0;
+}
+.paging8-top {
+    margin: 20px 0;
+}
+.paging8-bottom {
+    margin: 20px 0 0;
+}
+.paging8 a {
+    color: #000;
+    font-weight: bold;
+    width: 100%;
+    float: left;
+    text-align: center;
+    padding: 3px 0;
+    font-size: 90%;
+}
+.paging8 a:hover {
+    color: #555;
+    border: none;
+    background-color: #d9d6ac;
+}
+.paging8 span {
+    padding: 0 3px;
+}
+.paging8-prev {
+    width: calc(25% - 6px);
+    float: left;
+    background-color: #d0cda3;
+    border-left: 4px solid #afad85;
+}
+.paging8-next {
+    width: calc(25% - 6px);
+    float: right;
+    background-color: #d0cda3;
+    border-right: 4px solid #afad85;
+}
+
+.paging8-title-list {
+    clear: both;
+    width: calc(100% - 4px);
+    padding: 5px 0;
+    float: left;
+    background-color: #d0cda3;
+    margin: 4px 0 20px;
+    font-size: 90%;
+    font-weight: 600;
+    border-left: 4px solid #afad85;
+}
+.paging8-title-list .paging8-title-item {
+    padding: 3px 10px;
+    float: left;
+    width: calc(100% - 20px);
+}
+.paging8-title-list .paging8-title-item-current {
+    font-weight: bold;
+    padding: 3px 10px;
+    color: #777;
+}
+.paging8-title-list .paging8-title-item a {
+    color: #000;
+    padding: 3px 10px;
+    width: calc(100% - 20px);
+    margin: 0 0 0 -10px;
+    float: left;
+}
+.paging8-title-list .paging8-title-item a:hover {
+    background-color: #d9d6ac;
+    color: black
+}
+.paging8-title-list span {
+    padding: 0 3px;
+}
+
+}
+
+/* MOBILE LANDSCAPE/TABLET PORTRAIT */
+@media only screen and (min-width: 560px) {
+
+}
+
+/*TABLET*/
+@media only screen and (min-width: 704px) {
+
+}
+
+/* PC/LAPTOP/TABLET LANDSCAPE */
+@media only screen and (min-width: 912px) {
+
+}

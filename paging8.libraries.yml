@@ -1,0 +1,5 @@
+paging8.theme:
+  version: 1.x
+  css:
+    theme:
+      css/paging8.style.css: {}
