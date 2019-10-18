@@ -1,97 +1,112 @@
 <?php
 // Needs to be added to a theme to avoid cache problems
-//function paging8_preprocess_node(&$variables) {
-//    $variables['#cache']['contexts'][] = 'url.query_args:page';
-//}
+function paging8_preprocess_node(&$variables) {
+    $variables['#cache']['contexts'][] = 'url.query_args:page';
+}
 
 use Drupal\filter\FilterProcessResult;
 
+/**
+ * Implements hook_theme().
+ */
+function paging8_theme() {
+    return [
+        'top_pager' => [
+            'variables' => ['top_pager_array' => NULL],
+        ],
+        'bottom_pager' => [
+            'render element' => 'elements',
+            'file' => 'bottom.theme.inc',
+        ],
+    ];
+}
+
 function paging8_node_view(&$build, $node, $display, $view_mode) {
-  if ($view_mode == 'full') {
+//  if ($view_mode == 'full') {
     $build['#cache']['max-age'] = 0;
-
-    $text = $build['body'][0]['#text'];
-    //check if there are multiple pages at all; if not, there's no need to process things
-    if (strpos($text, '!--pagebreak--') != FALSE) {
-
-      //collects and validate the ?page= argument
-      $page_nr = \Drupal::request()->query->get('page');
-      $page_nr = is_numeric($page_nr) ? $page_nr : 0;
-
-      //split text and count pages, then render the requested page
-      $splitted_a = explode('<!--pagebreak-->', $text);
-      $page_count = count($splitted_a);
-      $splitted = $splitted_a[$page_nr];
-
-      $current_path = \Drupal::service('path.current')->getPath();
-      $path_alias = \Drupal::service('path.alias_manager')
-        ->getAliasByPath($current_path/*, $langcode*/);
-
-      $page_nr == 1 ? $prev_page_arg = '' : $prev_page_arg = '?page=' . strval($page_nr - 1);
-      $next_page_arg = '?page=' . strval($page_nr + 1);
-      $page_titles_marker_start = '<!--pagetitles--';
-      $page_titles_marker_end = '--pagetitles-->';
-      $page_titles_start_pos = strpos($text, $page_titles_marker_start) + strlen($page_titles_marker_start);
-      $page_titles_end_pos = strpos($text, $page_titles_marker_end);
-      $page_titles_a = [];
-      if ($page_titles_start_pos && $page_titles_end_pos) {
-        $page_titles_length = $page_titles_end_pos - $page_titles_start_pos;
-        $page_titles = substr($text, $page_titles_start_pos, $page_titles_length);
-        $page_titles_a = explode('||', $page_titles);
-      }
-      if (empty($page_titles_a)) {
-        $next_page_title = '';
-        $previous_page_title = '';
-        $current_page_title = '<p class="current-page-title">
-                ' . $page_titles_a[$page_nr] . '
-            </p>';
-      } else {
-        $next_page_title = '
-            <span class="next-page-title">
-                ' . $page_titles_a[$page_nr + 1] . '
-            </span>';
-        $previous_page_title = '<span class="previous-page-title">
-                ' . ($page_nr == 0 ? '' : $page_titles_a[$page_nr - 1]) . '
-            </span>';
-        $current_page_title = '<span class="current-page-title">
-                ' . $page_titles_a[$page_nr] . '
-            </span>';
-      }
-      if ($page_nr == 0) {
-        $pager_top = '
-<div class="paging8 paging8-top"><div class=""></div>
-    ' . $current_page_title . '
-    <div class="paging8-next paging8-next-full">
-        <a href="' . $path_alias . $next_page_arg . '">
-            ' . t('<div class="">Next </div>') . '
-        </a>
-    </div>
-</div>';
-      } elseif ($page_nr == $page_count - 1) {
-        $pager_top = '
-<div class="paging8 paging8-top">
-    <div class="paging8-prev paging8-prev-full">
-        <a href="' . $path_alias . $prev_page_arg . '"><div class="">' . t(' Previous') . '</div></a>
-    </div>' . $current_page_title . '<div class=""></div></div>';
-      } else {
-        $pager_top = '
-<div class="paging8 paging8-top">
-    <div class="paging8-prev">
-        <a href="' . $path_alias . $prev_page_arg . '">' . t('<div class=""> Previous</div>') . '
-            </a></div>' . $current_page_title . '<div class="paging8-next"><a href="' . $path_alias . $next_page_arg . '">' . t('<div class="">Next </div>') . '
-            </a></div></div>';
-      };
-      if ($page_nr == 0) {
-        $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter">Page ' . ($page_nr + 1) . ' of ' . $page_count . '</span><div class="paging8-prev paging8-prev-full"></div><div class="paging8-next paging8-next-full"><a href="' . $path_alias . $next_page_arg . '" class="">' . t('<div class="">Next </div>') . '</a>' . $next_page_title . '</div></div>';
-      } elseif ($page_nr == $page_count - 1) {
-        $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter">Page ' . ($page_nr + 1) . ' of ' . $page_count . '</span><div class="paging8-prev paging8-prev-full"><a href="' . $path_alias . $prev_page_arg . '" class="">' . t('<div class=""> Previous</div>') . '</a>' . $previous_page_title . '</div></div>';
-      } else {
-        $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter">Page ' . ($page_nr + 1) . ' of ' . $page_count . '</span><div class="paging8-prev"><a href="' . $path_alias . $prev_page_arg . '" class="">' . t('<div class=""> Previous</div>') . '</a>' . $previous_page_title . '</div><div class="paging8-next"><a href="' . $path_alias . $next_page_arg . '" class="">' . t('<div class="">Next </div>') . '</a>' . $next_page_title . '</div></div></div>';
-      };
-
-      $result = new FilterProcessResult($pager_top . $splitted . $pager_bottom);
-      $build['#attached']['library'][] = 'paging8/paging8.theme';
-      $build['body'][0]['#text'] = $result;
-    }
-  }
+//
+//    $text = $build['body'][0]['#text'];
+//    //check if there are multiple pages at all; if not, there's no need to process things
+//    if (strpos($text, '!--pagebreak--') != FALSE) {
+//
+//      //collects and validate the ?page= argument
+//      $page_nr = \Drupal::request()->query->get('page');
+//      $page_nr = is_numeric($page_nr) ? $page_nr : 0;
+//
+//      //split text and count pages, then render the requested page
+//      $splitted_a = explode('<!--pagebreak-->', $text);
+//      $page_count = count($splitted_a);
+//      $splitted = $splitted_a[$page_nr];
+//
+//      $current_path = \Drupal::service('path.current')->getPath();
+//      $path_alias = \Drupal::service('path.alias_manager')
+//        ->getAliasByPath($current_path/*, $langcode*/);
+//
+//      $page_nr == 1 ? $prev_page_arg = '' : $prev_page_arg = '?page=' . strval($page_nr - 1);
+//      $next_page_arg = '?page=' . strval($page_nr + 1);
+//      $page_titles_marker_start = '<!--pagetitles--';
+//      $page_titles_marker_end = '--pagetitles-->';
+//      $page_titles_start_pos = strpos($text, $page_titles_marker_start) + strlen($page_titles_marker_start);
+//      $page_titles_end_pos = strpos($text, $page_titles_marker_end);
+//      $page_titles_a = [];
+//      if ($page_titles_start_pos && $page_titles_end_pos) {
+//        $page_titles_length = $page_titles_end_pos - $page_titles_start_pos;
+//        $page_titles = substr($text, $page_titles_start_pos, $page_titles_length);
+//        $page_titles_a = explode('||', $page_titles);
+//      }
+//      if (empty($page_titles_a)) {
+//        $next_page_title = '';
+//        $previous_page_title = '';
+//        $current_page_title = '<p class="current-page-title">
+//                ' . $page_titles_a[$page_nr] . '
+//            </p>';
+//      } else {
+//        $next_page_title = '
+//            <span class="next-page-title">
+//                ' . $page_titles_a[$page_nr + 1] . '
+//            </span>';
+//        $previous_page_title = '<span class="previous-page-title">
+//                ' . ($page_nr == 0 ? '' : $page_titles_a[$page_nr - 1]) . '
+//            </span>';
+//        $current_page_title = '<span class="current-page-title">
+//                ' . $page_titles_a[$page_nr] . '
+//            </span>';
+//      }
+//      if ($page_nr == 0) {
+//        $pager_top = '
+//<div class="paging8 paging8-top"><div class=""></div>
+//    ' . $current_page_title . '
+//    <div class="paging8-next paging8-next-full">
+//        <a href="' . $path_alias . $next_page_arg . '">
+//            ' . t('<div class="">Next </div>') . '
+//        </a>
+//    </div>
+//</div>';
+//      } elseif ($page_nr == $page_count - 1) {
+//        $pager_top = '
+//<div class="paging8 paging8-top">
+//    <div class="paging8-prev paging8-prev-full">
+//        <a href="' . $path_alias . $prev_page_arg . '"><div class="">' . t(' Previous') . '</div></a>
+//    </div>' . $current_page_title . '<div class=""></div></div>';
+//      } else {
+//        $pager_top = '
+//<div class="paging8 paging8-top">
+//    <div class="paging8-prev">
+//        <a href="' . $path_alias . $prev_page_arg . '">' . t('<div class=""> Previous</div>') . '
+//            </a></div>' . $current_page_title . '<div class="paging8-next"><a href="' . $path_alias . $next_page_arg . '">' . t('<div class="">Next </div>') . '
+//            </a></div></div>';
+//      };
+//      if ($page_nr == 0) {
+//        $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter">Page ' . ($page_nr + 1) . ' of ' . $page_count . '</span><div class="paging8-prev paging8-prev-full"></div><div class="paging8-next paging8-next-full"><a href="' . $path_alias . $next_page_arg . '" class="">' . t('<div class="">Next </div>') . '</a>' . $next_page_title . '</div></div>';
+//      } elseif ($page_nr == $page_count - 1) {
+//        $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter">Page ' . ($page_nr + 1) . ' of ' . $page_count . '</span><div class="paging8-prev paging8-prev-full"><a href="' . $path_alias . $prev_page_arg . '" class="">' . t('<div class=""> Previous</div>') . '</a>' . $previous_page_title . '</div></div>';
+//      } else {
+//        $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter">Page ' . ($page_nr + 1) . ' of ' . $page_count . '</span><div class="paging8-prev"><a href="' . $path_alias . $prev_page_arg . '" class="">' . t('<div class=""> Previous</div>') . '</a>' . $previous_page_title . '</div><div class="paging8-next"><a href="' . $path_alias . $next_page_arg . '" class="">' . t('<div class="">Next </div>') . '</a>' . $next_page_title . '</div></div></div>';
+//      };
+//
+//      $result = new FilterProcessResult($pager_top . $splitted . $pager_bottom);
+//      $build['#attached']['library'][] = 'paging8/paging8.theme';
+//      $build['body'][0]['#text'] = $result;
+//    }
+//  }
 }
