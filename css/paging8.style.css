@@ -12,10 +12,13 @@
 
     .paging8-top {
         margin: 20px 0;
+        display: flex;
+        justify-content: flex-end;
     }
 
     .paging8-bottom {
         margin: 20px 0 0;
+        display: flex;
     }
 
     .paging8 a {
@@ -39,19 +42,28 @@
     }
 
     .paging8-prev {
-        width: calc(25% - 6px);
+        width: calc(20% - 2px);
         float: left;
         background-color: #d0cda3;
         border-left: 4px solid #afad85;
+        flex-direction: column;
+        display: flex;
+        justify-content: center;
     }
 
     .paging8-next {
-        width: calc(25% - 6px);
+        width: calc(20% - 2px);
         float: right;
         background-color: #d0cda3;
         border-right: 4px solid #afad85;
+        flex-direction: column;
+        display: flex;
+        justify-content: center;
     }
 
+    .paging8-next > a, .paging8-prev > a {
+        border-bottom: none;
+    }
     .paging8-title-list {
         clear: both;
         width: calc(100% - 4px);
@@ -74,6 +86,10 @@
         font-weight: bold;
         padding: 3px 10px;
         color: #777;
+    }
+    .current-page {
+        display: inline-block;
+        width: 60%;
     }
 
     .paging8-title-list .paging8-title-item a {

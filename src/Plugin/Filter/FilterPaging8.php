@@ -112,29 +112,19 @@ class FilterPaging8 extends FilterBase {
           $previous_page_title = '<p class="previous-page-title col-xs-12">
                 ' . $page_titles_array[$page_number - 1] . '
             </p>';
-          $current_page_title = '<p class="current-page-title col-xs-8">
-                <span class="blue-letters">#' . ($page_number + 1) . '</span>' . $page_titles_array[$page_number] . '
-            </p>';
         }
         if ($this->settings['paging8_showpagertop'] == TRUE) {
-          if ($page_number == 0) {
-            $pager_top = '';
-          }
-          elseif ($page_number == $page_count - 1) {
-            $pager_top = '<div class="paging8 paging8-top"><div class="paging8-prev paging8-prev-full col-xs-2"><a href="' . $path_alias . $prev_page_arg . '">' . $this->t('< <div class="mobile-slider"> Previous</div>') . '
-            </a></div>' . $current_page_title . '<div class="col-xs-2"></div></div>';
-          }
-          else {
-            $pager_top = '<div class="paging8 paging8-top"><div class="paging8-prev col-xs-2"><a href="' . $path_alias . $prev_page_arg . '">' . $this->t('< <div class="mobile-slider"> Previous</div>') . '
-            </a></div>' . $current_page_title . '<div class="paging8-next col-xs-2"><a href="' . $path_alias . $next_page_arg . '">' . $this->t('<div class="mobile-slider">Next </div> >') . '
-            </a></div></div>';
-          };
             $renderable = [
                 '#theme' => 'top_pager',
                 '#top_pager_array' => [
-                    'current_page_title' => $current_page_title,
+                    'current_page_number' => '#' . ($page_number + 1),
+                    'current_page_title' => $page_titles_array[$page_number],
                     'path_alias' => $path_alias,
+                    'prev_page_arg' => $prev_page_arg,
                     'next_page_arg' => $next_page_arg,
+                    'page_array_index' => $page_number,
+                    'page_count' => $page_count-1,
+
                 ],
             ];
             $pager_top = \Drupal::service('renderer')->render($renderable);
