@@ -47,8 +47,7 @@ class FilterPaging8 extends FilterBase {
       $path_alias = \Drupal::service('path.alias_manager')
         ->getAliasByPath($current_path, $langcode);
 
-      if ($this->settings['paging8_showpagetitles'] == TRUE) {
-
+      if ($this->settings['paging8_show_page_titles'] == TRUE) {
         // Parses or generate Page titles.
         if (strpos($text, '!--pagetitles--') != FALSE) {
           // Extracts title section if exists.
@@ -64,23 +63,18 @@ class FilterPaging8 extends FilterBase {
           }
         }
 
-        $page_title_list = '<div class="paging8-title-list">';
-        for ($i = 0; $i < $page_count; $i++) {
-          if ($i == 0) {
-            $link_string = '<a href="' . $path_alias . '">' . strval($i + 1) . ' - ' . $page_titles_array[$i] . '</a>';
-          }
-          else {
-            $link_string = '<a href="' . $path_alias . '?page=' . strval($i) . '">' . strval($i + 1) . ' - ' . $page_titles_array[$i] . '</a>';
-          }
-          if ($i == $page_number) {
-            $item_render = '<div class="paging8-title-item paging8-title-item-current"><span>»</span>' . strval($i + 1) . '<span> - </span>' . $page_titles_array[$i] . '</div>';
-          }
-          else {
-            $item_render = '<div class="paging8-title-item">' . $link_string . '</div>';
-          }
-          $page_title_list = $page_title_list . $item_render;
-        }
-        $page_title_list = $page_title_list . '</div>';
+        $renderable = [
+            '#theme' => 'title_list',
+            '#title_list_array' => [
+                'page_titles_array' => $page_titles_array,
+                'path_alias' => $path_alias,
+                'page_array_index' => $page_number,
+            ],
+        ];
+        $page_title_list = \Drupal::service('renderer')->render($renderable);
+      }
+      else {
+          $page_title_list = '';
       }
 
       // This is non-conditional.
@@ -88,7 +82,7 @@ class FilterPaging8 extends FilterBase {
         $splitted = substr($splitted, 0, strpos($splitted, static::PAGE_TITLES_MARKER_START)) . substr($splitted, strpos($splitted, static::PAGE_TITLES_MARKER_END) + strlen(static::PAGE_TITLES_MARKER_END), strlen($splitted));
       }
 
-      if (($this->settings['paging8_showpagertop'] == TRUE) or ($this->settings['paging8_showpagerbottom'] == TRUE)) {
+      if (($this->settings['paging8_show_pager_top'] == TRUE) or ($this->settings['paging8_show_pager_bottom'] == TRUE)) {
         $page_number == 1 ? $prev_page_arg = '' : $prev_page_arg = '?page=' . strval($page_number - 1);
         $next_page_arg = '?page=' . strval($page_number + 1);
         $page_titles_start_pos = strpos($text, static::PAGE_TITLES_MARKER_START) + strlen(static::PAGE_TITLES_MARKER_START);
@@ -99,21 +93,7 @@ class FilterPaging8 extends FilterBase {
           $page_titles = substr($text, $page_titles_start_pos, $page_titles_length);
           $page_titles_array = explode('||', $page_titles);
         }
-        if (empty($page_titles_array)) {
-          $next_page_title = '';
-          $previous_page_title = '';
-          $current_page_title = '';
-        }
-        else {
-          $next_page_title = '
-            <p class="next-page-title col-xs-12">
-                ' . $page_titles_array[$page_number + 1] . '
-            </p>';
-          $previous_page_title = '<p class="previous-page-title col-xs-12">
-                ' . $page_titles_array[$page_number - 1] . '
-            </p>';
-        }
-        if ($this->settings['paging8_showpagertop'] == TRUE) {
+        if ($this->settings['paging8_show_pager_top'] == TRUE) {
             $renderable = [
                 '#theme' => 'top_pager',
                 '#top_pager_array' => [
@@ -123,7 +103,7 @@ class FilterPaging8 extends FilterBase {
                     'prev_page_arg' => $prev_page_arg,
                     'next_page_arg' => $next_page_arg,
                     'page_array_index' => $page_number,
-                    'page_count' => $page_count-1,
+                    'page_count' => $page_count,
 
                 ],
             ];
@@ -133,16 +113,19 @@ class FilterPaging8 extends FilterBase {
           $pager_top = '';
         }
 
-        if ($this->settings['paging8_showpagerbottom'] == TRUE) {
-          if ($page_number == 0) {
-            $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter col-xs-12">Page ' . ($page_number + 1) . ' of ' . $page_count . '</span><div class="paging8-next paging8-next-full col-xs-12"><a href="' . $path_alias . $next_page_arg . '" class="col-xs-12">' . $this->t('<div class="mobile-slider">Next </div> >') .  '</a></div>'.$next_page_title.'</div>';
-          }
-          elseif ($page_number == $page_count - 1) {
-            $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter col-xs-12">Page ' . ($page_number + 1) . ' of ' . $page_count . '</span><div class="paging8-prev paging8-prev-full col-xs-6"><a href="' . $path_alias . $prev_page_arg . '" class="col-xs-12">' . $this->t('< <div class="mobile-slider"> Previous</div>') . '</a></div>'.$previous_page_title.'</div>';
-          }
-          else {
-            $pager_bottom = '<div class="paging8 paging8-bottom"><span class="page-counter col-xs-12">Page ' . ($page_number + 1) . ' of ' . $page_count . '</span><div class="paging8-prev col-xs-6"><a href="' . $path_alias . $prev_page_arg . '" class="col-xs-12">' . $this->t('< <div class="mobile-slider"> Previous</div>') . '</a>'.$previous_page_title.'</div><div class="paging8-next col-xs-6"><a href="' . $path_alias . $next_page_arg . '" class="col-xs-12">' . $this->t('<div class="mobile-slider">Next </div> >') . '</a>'.$next_page_title.'</div></div>';
-          };
+        if ($this->settings['paging8_show_pager_bottom'] == TRUE) {
+            $renderable = [
+                '#theme' => 'bottom_pager',
+                '#bot_pager_array' => [
+                    'path_alias' => $path_alias,
+                    'prev_page_arg' => $prev_page_arg,
+                    'next_page_arg' => $next_page_arg,
+                    'page_array_index' => $page_number,
+                    'page_count' => $page_count,
+
+                ],
+            ];
+            $pager_bottom = \Drupal::service('renderer')->render($renderable);
         }
         else {
           $pager_bottom = '';
@@ -152,7 +135,7 @@ class FilterPaging8 extends FilterBase {
       // Renders the final result and loads style.css.
       $result = new FilterProcessResult($pager_top . $splitted . $pager_bottom . $page_title_list);
 
-      if ($this->settings['paging8_loadcss'] == TRUE) {
+      if ($this->settings['paging8_load_css'] == TRUE) {
         $result->setAttachments(['library' => ['paging8/paging8.theme'],]);
       }
     }
@@ -169,28 +152,28 @@ class FilterPaging8 extends FilterBase {
 
   // Options for pager placement.
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $form['paging8_showpagertop'] = [
+    $form['paging8_show_pager_top'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show simple pager on top'),
-      '#default_value' => $this->settings['paging8_showpagertop'],
+      '#default_value' => $this->settings['paging8_show_pager_top'],
       '#description' => $this->t('Display a simple prev/next pager above the content.'),
     ];
-    $form['paging8_showpagerbottom'] = [
+    $form['paging8_show_pager_bottom'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show simple pager on bottom'),
-      '#default_value' => $this->settings['paging8_showpagerbottom'],
+      '#default_value' => $this->settings['paging8_show_pager_bottom'],
       '#description' => $this->t('Display a simple prev/next pager below the content'),
     ];
-    $form['paging8_showpagetitles'] = [
+    $form['paging8_show_page_titles'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Show page list'),
-      '#default_value' => $this->settings['paging8_showpagetitles'],
-      '#description' => $this->t('Display clickable page list after the content.</br>Format: &lt;!--pagetitles--Title1||Title2--pagetitles--!&gt;.</br>Position of the list is not relevant.'),
+      '#default_value' => $this->settings['paging8_show_page_titles'],
+      '#description' => $this->t('Display clickable page list after the content.</br>Format: &lt;!--pagetitles--Title1||Title2--pagetitles--&gt;.</br>Position of the list is not relevant.'),
     ];
-    $form['paging8_loadcss'] = [
+    $form['paging8_load_css'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Load paging8.basic.css'),
-      '#default_value' => $this->settings['paging8_loadcss'],
+      '#default_value' => $this->settings['paging8_load_css'],
       '#description' => $this->t('Check to load the default css. If you want to customize, uncheck this option and style the pager with your theme css.'),
     ];
     return $form;

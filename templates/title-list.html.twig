@@ -1,0 +1,15 @@
+<div class="paging8-title-list">
+    {% set index = 0 %}
+    {% for page_title in title_list_array.page_titles_array %}
+        {% if index == title_list_array.page_array_index %}
+            <div class="paging8-title-item paging8-title-item-current">
+                <span>»</span>{{ index + 1 }}<span> - </span>{{ page_title }}
+            </div>
+        {% else %}
+            <div class="paging8-title-item">
+                <a href="{{ title_list_array.path_alias }}?page={{ index }}">{{ index + 1 }} - {{ page_title }}</a>
+            </div>
+        {% endif %}
+        {% set index = index + 1 %}
+    {% endfor %}
+</div>

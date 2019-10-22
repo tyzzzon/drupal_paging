@@ -1,0 +1,19 @@
+<div class="paging8 paging8-bottom">
+    <div class="paging8-prev">
+        {% if bot_pager_array.page_array_index != 0 %}
+            <a href="{{ bot_pager_array.path_alias ~ bot_pager_array.prev_page_arg }}">
+                <span>{{ '<'|escape('html') }} Previous</span>
+            </a>
+        {% endif %}
+    </div>
+    <div class="current-page">
+        <span class="page-counter">Page {{ bot_pager_array.page_array_index + 1 }} of {{ bot_pager_array.page_count }}</span>
+    </div>
+    <div class="paging8-next">
+        {% if bot_pager_array.page_array_index != bot_pager_array.page_count-1 %}
+            <a href="{{ bot_pager_array.path_alias ~ bot_pager_array.next_page_arg }}">
+                <span>Next {{ '>'|escape('html') }}</span>
+            </a>
+        {% endif %}
+    </div>
+</div>
